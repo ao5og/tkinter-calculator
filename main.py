@@ -11,6 +11,8 @@ class Calculator:
         # related to logic
         self.storage = 0
         self.current_operation = ''
+        self.oper_funcs = ['add', 'sub', 'mul', 'div']
+        self.opers_symbols = ['+', '-', 'x', '/']
 
 
         # declaring and placing the main frame onto the master
@@ -89,7 +91,7 @@ class Calculator:
         dot_button = Button(parent, text=".", padx=7, pady=1,
                             relief=RAISED, bg="lightblue",
                             font=("Helvetica", 15))
-        dot_button.config(command=self.add_dot)
+        dot_button.config(command=fn.add_dot)
         dot_button.grid(row=3, column=1, padx=2, pady=2)
 
     def add_equal_button(self, parent):
@@ -98,25 +100,28 @@ class Calculator:
                              relief=RAISED, bg="lightblue",
                              font=("Helvetica", 15))
         equalButton.grid(row=3, column=2, padx=2, pady=2)
-        equalButton.config(command=self.display_result)
+        equalButton.config(command=fn.display_result)
 
     def add_function_buttons(self, parent):
-        opers_symbols = ['+', '-', 'x', '/']
-        oper_funcs = ['add', 'sub', 'mul', 'div']
-        for i in range(len(opers_symbols)):
-            self.func_buttons.append(Button(parent, text=opers_symbols[i],
+        for i in range(len(self.opers_symbols)):
+            self.func_buttons.append(Button(parent, text=self.opers_symbols[i],
                                             padx=5, pady=1, relief=RAISED,
                                             bg="lightgreen", font=self.font))
             self.func_buttons[-1].grid(padx=2, pady=2, sticky = 'we')
             self.func_buttons[-1].config(
-                command=lambda oper=oper_funcs[i]: self.set_operation(oper))
+                command=lambda to_set=self.oper_funcs[i]: self.set_operation(to_set))
+
+    def set_operation(self, to_set):
+        """Change the current operation"""
+        self.current_operation = to_set
+        print(f"Current operation is {self.current_operation}")
 
     def add_bottom_buttons(self, parent):
         self.bottom_buttons.append(Button(parent, bg="red", font=self.font,
-                                          text="CLEAR", command=self.clear))
+                                          text="CLEAR", command=fn.clear))
         self.bottom_buttons[-1].grid(row=0, column=0,padx=2, pady=2)
         self.bottom_buttons.append(Button(parent, bg ="red", font=self.font,
-                                          text="DELETE", command=self.delete))
+                                          text="DELETE", command=fn.delete))
         self.bottom_buttons[-1].grid(row=0, column=1,padx=2, pady=2)
 
 

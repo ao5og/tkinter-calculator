@@ -16,8 +16,6 @@ def add_dot(self):
 def display_result(self, label):
     label.set(str(self.storage))
 
-def set_operation(self, operation):
-    pass
 
 def clear(self):
     pass
