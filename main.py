@@ -10,9 +10,13 @@ class Calculator:
 
         # related to logic
         self.storage = 0
-        self.current_operation = ''
+        self.current_operation = 'add'
+        self.value = 0
+        self.last_value = 0
+
+        self.result = 0
         self.oper_funcs = ['add', 'sub', 'mul', 'div']
-        self.opers_symbols = ['+', '-', 'x', '/']
+        self.opers_symbols = ['+', '-', 'x', '/']  #indeces 0,1,2,3
 
 
         # declaring and placing the main frame onto the master
@@ -21,7 +25,7 @@ class Calculator:
 
         # the variable which displays on the display
         self.label_string = StringVar()
-        self.label_string.set('empty')
+        self.label_string.set('0')
 
         # declaring all the frames and the label for display
         self.display_label = Label(self.main_frame,
@@ -54,15 +58,6 @@ class Calculator:
         self.add_function_buttons(self.func_frame)
         self.add_bottom_buttons(self.bottom_frame)
 
-    # functions used for the logic
-    def add_digit(self, digit):
-        current = self.label_string.get()
-        if current != 'empty':
-            new_string = current + digit
-        else:
-            new_string = digit
-
-        self.label_string.set(new_string)
 
 
     def add_main_digits_buttons(self, parent):
@@ -74,7 +69,7 @@ class Calculator:
                            relief=RAISED, bg="lightblue",
                            font=self.font))
                 self.buttons[-1].config(
-                    command=lambda x=str(value): fn.add_digit(self.label_string, x))
+                    command=lambda str_val=str(value): self.add_digit(str_val))
                 self.buttons[-1].grid(row=r, column=c, padx=2, pady=2)
 
     def add_zero_button(self, parent):
@@ -91,7 +86,7 @@ class Calculator:
         dot_button = Button(parent, text=".", padx=7, pady=1,
                             relief=RAISED, bg="lightblue",
                             font=("Helvetica", 15))
-        dot_button.config(command=fn.add_dot)
+        dot_button.config(command=self.add_dot)
         dot_button.grid(row=3, column=1, padx=2, pady=2)
 
     def add_equal_button(self, parent):
@@ -100,7 +95,7 @@ class Calculator:
                              relief=RAISED, bg="lightblue",
                              font=("Helvetica", 15))
         equalButton.grid(row=3, column=2, padx=2, pady=2)
-        equalButton.config(command=fn.display_result)
+        equalButton.config(command=self.equal_press)
 
     def add_function_buttons(self, parent):
         for i in range(len(self.opers_symbols)):
@@ -109,20 +104,123 @@ class Calculator:
                                             bg="lightgreen", font=self.font))
             self.func_buttons[-1].grid(padx=2, pady=2, sticky = 'we')
             self.func_buttons[-1].config(
-                command=lambda to_set=self.oper_funcs[i]: self.set_operation(to_set))
+                command=lambda to_set=self.oper_funcs[i]: self.oper_press(to_set))
+
+
+    def to_store(self):
+        self.storage = int(self.label_string.get())
+        print(f"storage is {self.storage}")
+
+    def equal_press(self):
+        """When equal is pressed.
+        Storage is updated.
+        Storage is displayed"""
+        print("pressed equal")
+
+        self.save_last_value()
+        self.evaluate_equal()
+        self.reset_label()
+        self.display_storage()
+        print("*****")
+
+
+    def oper_press(self, to_set):
+        """What happens when an operation button is pressed"""
+        print(f"press on {to_set}")
+        self.save_value()
+        self.evaluate()
+        self.set_operation(to_set) # change operation to new one
+        self.reset_label() # set label back to zero
+        print("******")
+
+    def save_value(self):
+        self.value = int(self.label_string.get())
+
+    def save_last_value(self):
+        self.last_value = self.value
+
+    def reset_value(self):
+        self.last_value = 0
+
+    def evaluate(self):
+        """Update storage with previous stored value [operation] new input"""
+        # set storage to prev storage [oper] what's on the label
+        print(f"Storage before press: {self.storage}, "
+              f"operation before press: {self.current_operation}")
+        if self.current_operation == 'add':
+            self.storage = self.storage + self.value
+        elif self.current_operation == 'sub':
+            self.storage = self.storage - self.value
+        elif self.current_operation == 'mul':
+            self.storage = self.storage * self.value
+        elif self.current_operation == 'div':
+            self.storage = self.storage / self.value
+        print(f"Applied value is {self.value}")
+        print(f"Storage updated to {self.storage} ")
+
+    def evaluate_equal(self):
+        """Update storage with previous stored value [operation] new input"""
+        # set storage to prev storage [oper] what's on the label
+
+        if self.current_operation == 'add':
+            self.storage = self.storage + self.last_value
+        elif self.current_operation == 'sub':
+            self.storage = self.storage - self.last_value
+        elif self.current_operation == 'mul':
+            self.storage = self.storage * self.last_value
+        elif self.current_operation == 'div':
+            self.storage = self.storage / self.last_value
+
+        print(f"Storage updated to {self.storage} ")
+
 
     def set_operation(self, to_set):
         """Change the current operation"""
-        self.current_operation = to_set
-        print(f"Current operation is {self.current_operation}")
+        self.current_operation = to_set  # now can change the operation
+        print(f"operation is now {self.current_operation}")
+
+    def reset_label(self):
+        """Set label back to zero"""
+        self.label_string.set('0')
+        print("label set to zero")
+
+    def display_storage(self):
+        self.label_string.set(str(self.storage))
+
+
+    def clear_all(self):
+        self.last_value = 0
+        self.value = 0
+        self.current_operation = 'add'
+        self.storage = 0
+        self.reset_label()
+
+    def delete(self):
+        if len(self.label_string.get()) == 1:
+            self.reset_label()
+        else:
+            self.label_string.set(self.label_string.get()[0:-1])
+
+    def add_digit(self, digit_str):
+        if self.label_string.get() != '0':
+            new_string = self.label_string.get() + digit_str
+        else:
+            new_string = digit_str
+
+        self.label_string.set(new_string)
+
 
     def add_bottom_buttons(self, parent):
         self.bottom_buttons.append(Button(parent, bg="red", font=self.font,
-                                          text="CLEAR", command=fn.clear))
+                                          text="CLEAR", command=self.clear_all))
         self.bottom_buttons[-1].grid(row=0, column=0,padx=2, pady=2)
         self.bottom_buttons.append(Button(parent, bg ="red", font=self.font,
-                                          text="DELETE", command=fn.delete))
+                                          text="DELETE", command=self.delete))
         self.bottom_buttons[-1].grid(row=0, column=1,padx=2, pady=2)
+
+    def add_dot(self):
+        """What happens when period is pressed."""
+        pass
 
 
 
