@@ -1,5 +1,5 @@
 from tkinter import *
-import functions as fn
+
 
 
 class Calculator:
